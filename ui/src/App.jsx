@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import './App.css'
 
 // 임의의 커피 메뉴 데이터
@@ -66,10 +66,34 @@ const STOCK_MENUS = MENU_DATA.slice(0, 3)
 function App() {
   const [currentView, setCurrentView] = useState('order') // 'order' or 'admin'
   const [cart, setCart] = useState([])
-  const [orders, setOrders] = useState([])
-  const [stocks, setStocks] = useState(
-    STOCK_MENUS.map(menu => ({ menuId: menu.id, menuName: menu.name, stock: 10 }))
-  )
+  const [orders, setOrders] = useState(() => {
+    // localStorage에서 주문 데이터 불러오기
+    const savedOrders = localStorage.getItem('orders')
+    return savedOrders ? JSON.parse(savedOrders) : []
+  })
+  const [stocks, setStocks] = useState(() => {
+    // localStorage에서 재고 데이터 불러오기
+    const savedStocks = localStorage.getItem('stocks')
+    if (savedStocks) {
+      return JSON.parse(savedStocks)
+    }
+    return STOCK_MENUS.map(menu => ({ menuId: menu.id, menuName: menu.name, stock: 10 }))
+  })
+
+  // localStorage에 주문 데이터 저장
+  useEffect(() => {
+    localStorage.setItem('orders', JSON.stringify(orders))
+  }, [orders])
+
+  // localStorage에 재고 데이터 저장
+  useEffect(() => {
+    localStorage.setItem('stocks', JSON.stringify(stocks))
+  }, [stocks])
+
+  // 장바구니 아이템 제거
+  const removeFromCart = (cartKey) => {
+    setCart(prev => prev.filter(item => item.cartKey !== cartKey))
+  }
 
   // 장바구니에 아이템 추가
   const addToCart = (menu, selectedOptions) => {
@@ -101,10 +125,10 @@ function App() {
     }
   }
 
-  // 총 금액 계산
-  const getTotalAmount = () => {
+  // 총 금액 계산 (성능 최적화)
+  const totalAmount = useMemo(() => {
     return cart.reduce((sum, item) => sum + item.totalPrice, 0)
-  }
+  }, [cart])
 
   // 주문하기
   const handleOrder = () => {
@@ -126,14 +150,14 @@ function App() {
         quantity: item.quantity,
         price: item.basePrice
       })),
-      totalAmount: getTotalAmount(),
+      totalAmount: totalAmount,
       status: 'received' // 주문이 들어오면 처음에는 '주문 접수' 상태
     }
 
     // 주문 목록에 추가
     setOrders(prev => [orderData, ...prev])
     console.log('주문 데이터:', orderData)
-    alert(`주문이 완료되었습니다!\n총 금액: ${getTotalAmount().toLocaleString()}원`)
+    alert(`주문이 완료되었습니다!\n총 금액: ${totalAmount.toLocaleString()}원`)
     setCart([])
   }
 
@@ -168,14 +192,14 @@ function App() {
     )
   }
 
-  // 대시보드 통계 계산
-  const getDashboardStats = () => {
+  // 대시보드 통계 계산 (성능 최적화)
+  const dashboardStats = useMemo(() => {
     const totalOrders = orders.length
     const receivedOrders = orders.filter(o => o.status === 'received').length
     const inProductionOrders = orders.filter(o => o.status === 'in_production').length
     const completedOrders = orders.filter(o => o.status === 'completed').length
     return { totalOrders, receivedOrders, inProductionOrders, completedOrders }
-  }
+  }, [orders])
 
   return (
     <div className="app">
@@ -235,8 +259,18 @@ function App() {
                           </span>
                           <span className="cart-item-quantity">X {item.quantity}</span>
                         </div>
-                        <div className="cart-item-price">
-                          {item.totalPrice.toLocaleString()}원
+                        <div className="cart-item-actions">
+                          <div className="cart-item-price">
+                            {item.totalPrice.toLocaleString()}원
+                          </div>
+                          <button 
+                            className="cart-item-remove"
+                            onClick={() => removeFromCart(item.cartKey)}
+                            aria-label="장바구니에서 제거"
+                            title="제거"
+                          >
+                            ✕
+                          </button>
                         </div>
                       </div>
                     ))
@@ -245,7 +279,7 @@ function App() {
                 <div className="cart-summary">
                   <div className="total-amount">
                     <span className="total-label">총 금액</span>
-                    <span className="total-price">{getTotalAmount().toLocaleString()}원</span>
+                    <span className="total-price">{totalAmount.toLocaleString()}원</span>
                   </div>
                   <button className="order-button" onClick={handleOrder}>
                     주문하기
@@ -262,7 +296,7 @@ function App() {
           onIncreaseStock={increaseStock}
           onDecreaseStock={decreaseStock}
           onUpdateOrderStatus={updateOrderStatus}
-          dashboardStats={getDashboardStats()}
+          dashboardStats={dashboardStats}
         />
       )}
     </div>
