@@ -64,6 +64,306 @@
   box-sizing: border-box;
 }
 
+/* 관리자 화면 */
+.admin-content {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  padding-bottom: 2rem;
+}
+
+.admin-section {
+  margin-bottom: 3rem;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1.5rem;
+}
+
+/* 대시보드 통계 */
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.stat-item {
+  background-color: #f9fafb;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2563eb;
+}
+
+/* 재고 현황 */
+.stock-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.stock-card {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.stock-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.stock-menu-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.stock-details {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: nowrap;
+}
+
+.stock-quantity {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+}
+
+.stock-status {
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.05);
+  white-space: nowrap;
+}
+
+.stock-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.stock-button {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background-color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stock-button:hover:not(:disabled) {
+  background-color: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+.stock-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.stock-button.increase {
+  background-color: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+.stock-button.increase:hover {
+  background-color: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+.stock-button.decrease {
+  background-color: #ffffff;
+  border-color: #d1d5db;
+  color: #333;
+}
+
+/* 주문 현황 */
+.orders-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.orders-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.orders-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.orders-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.empty-orders {
+  color: #9ca3af;
+  font-size: 0.9rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.order-card {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-time {
+  font-size: 0.95rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.order-status-badge {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+}
+
+.order-status-badge.status-pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.order-status-badge.status-received {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.order-status-badge.status-in_production {
+  background-color: #fce7f3;
+  color: #9f1239;
+}
+
+.order-status-badge.status-completed {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.order-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border-radius: 4px;
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.order-item-name {
+  flex: 1;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.order-item-quantity {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.order-item-price {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #333;
+  min-width: 80px;
+  text-align: right;
+}
+
+.order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.order-total {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.order-action-button {
+  padding: 0.5rem 1.5rem;
+  background-color: #2563eb;
+  border: 1px solid #2563eb;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.order-action-button:hover {
+  background-color: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
 .menu-container {
   display: flex;
   flex-wrap: wrap;
@@ -368,5 +668,22 @@
 
   .total-amount {
     align-items: flex-start;
+  }
+
+  .admin-content {
+    padding: 1rem;
+  }
+
+  .dashboard-stats {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+
+  .stock-container {
+    grid-template-columns: 1fr;
+  }
+
+  .order-card {
+    padding: 1rem;
   }
 }
