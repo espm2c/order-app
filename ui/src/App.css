@@ -359,18 +359,260 @@
   background-color: #2a6ba0;
 }
 
-/* 관리자 화면 플레이스홀더 */
-.admin-placeholder {
+/* 관리자 화면 */
+.admin-view {
   flex: 1;
+  background-color: #f5f5f5;
+  overflow-y: auto;
+}
+
+.admin-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.admin-section {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 1.5rem 0;
+}
+
+/* 관리자 대시보드 */
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.dashboard-card {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  border: 2px solid #e5e5e5;
+}
+
+.dashboard-label {
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #4a90e2;
+}
+
+/* 재고 현황 */
+.stock-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.stock-card {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid #e5e5e5;
+}
+
+.stock-menu-name {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.stock-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.stock-quantity {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.stock-status {
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.stock-controls {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.stock-btn {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #4a90e2;
+  background-color: #ffffff;
+  color: #4a90e2;
+  border-radius: 4px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.stock-btn:hover:not(:disabled) {
+  background-color: #4a90e2;
+  color: #ffffff;
+}
+
+.stock-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 주문 현황 */
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.empty-orders {
+  text-align: center;
+  color: #999;
   padding: 2rem;
 }
 
-.admin-placeholder p {
-  color: #999;
+.order-card {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid #e5e5e5;
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.order-time {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.order-status-badge {
+  padding: 0.375rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-received {
+  background-color: #3498db;
+  color: #ffffff;
+}
+
+.status-in_production {
+  background-color: #f39c12;
+  color: #ffffff;
+}
+
+.status-completed {
+  background-color: #27ae60;
+  color: #ffffff;
+}
+
+.order-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9375rem;
+}
+
+.order-item-name {
+  color: #333;
+}
+
+.order-item-price {
+  color: #666;
+  font-weight: 500;
+}
+
+.order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e5e5;
+}
+
+.order-total {
+  font-size: 1rem;
+  color: #333;
+}
+
+.order-total strong {
+  color: #4a90e2;
   font-size: 1.125rem;
+}
+
+.order-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.status-btn {
+  padding: 0.5rem 1rem;
+  background-color: #4a90e2;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.status-btn:hover {
+  background-color: #357abd;
+}
+
+.status-btn:active {
+  background-color: #2a6ba0;
 }
 
 /* 반응형 디자인 */
@@ -401,5 +643,31 @@
 
   .order-button {
     width: 100%;
+  }
+
+  .admin-content {
+    padding: 1rem;
+  }
+
+  .dashboard-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stock-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .order-footer {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .order-actions {
+    width: 100%;
+  }
+
+  .status-btn {
+    flex: 1;
   }
 }

@@ -52,6 +52,33 @@ const MENU_DATA = [
 function App() {
   const [currentView, setCurrentView] = useState('order') // 'order' or 'admin'
   const [cart, setCart] = useState([])
+  
+  // 관리자 화면 상태
+  const [stocks, setStocks] = useState([
+    { id: 1, name: '아메리카노(ICE)', stock: 10 },
+    { id: 2, name: '아메리카노(HOT)', stock: 8 },
+    { id: 3, name: '카페라떼', stock: 3 }
+  ])
+  const [orders, setOrders] = useState([
+    {
+      id: 1,
+      orderTime: new Date('2024-01-15T10:30:00'),
+      items: [
+        { menuName: '아메리카노(ICE)', quantity: 2, price: 4000, options: [] }
+      ],
+      totalAmount: 8000,
+      status: 'received'
+    },
+    {
+      id: 2,
+      orderTime: new Date('2024-01-15T11:00:00'),
+      items: [
+        { menuName: '카페라떼', quantity: 1, price: 5000, options: [{ name: '샷 추가' }] }
+      ],
+      totalAmount: 5500,
+      status: 'received'
+    }
+  ])
 
   // 장바구니 아이템 제거
   const removeFromCart = (cartKey) => {
@@ -195,9 +222,12 @@ function App() {
           </div>
         </>
       ) : (
-        <div className="admin-placeholder">
-          <p>관리자 화면은 추후 구현 예정입니다.</p>
-        </div>
+        <AdminView 
+          stocks={stocks}
+          setStocks={setStocks}
+          orders={orders}
+          setOrders={setOrders}
+        />
       )}
     </div>
   )
@@ -275,6 +305,194 @@ function MenuCard({ menu, onAddToCart }) {
           담기
         </button>
       </div>
+    </div>
+  )
+}
+
+// 관리자 화면 컴포넌트
+function AdminView({ stocks, setStocks, orders, setOrders }) {
+  // 대시보드 통계 계산
+  const dashboardStats = useMemo(() => {
+    const totalOrders = orders.length
+    const receivedOrders = orders.filter(o => o.status === 'received').length
+    const inProductionOrders = orders.filter(o => o.status === 'in_production').length
+    const completedOrders = orders.filter(o => o.status === 'completed').length
+    
+    return {
+      total: totalOrders,
+      received: receivedOrders,
+      inProduction: inProductionOrders,
+      completed: completedOrders
+    }
+  }, [orders])
+
+  // 재고 상태 확인
+  const getStockStatus = (stock) => {
+    if (stock === 0) return { text: '품절', color: '#e74c3c' }
+    if (stock < 5) return { text: '주의', color: '#f39c12' }
+    return { text: '정상', color: '#27ae60' }
+  }
+
+  // 재고 증가
+  const increaseStock = (menuId) => {
+    setStocks(prev => prev.map(s => 
+      s.id === menuId ? { ...s, stock: s.stock + 1 } : s
+    ))
+  }
+
+  // 재고 감소
+  const decreaseStock = (menuId) => {
+    setStocks(prev => prev.map(s => {
+      if (s.id === menuId && s.stock > 0) {
+        return { ...s, stock: s.stock - 1 }
+      }
+      return s
+    }))
+  }
+
+  // 주문 상태 변경
+  const updateOrderStatus = (orderId, newStatus) => {
+    setOrders(prev => prev.map(o => 
+      o.id === orderId ? { ...o, status: newStatus } : o
+    ))
+  }
+
+  // 날짜 포맷팅
+  const formatDateTime = (date) => {
+    const d = new Date(date)
+    const month = d.getMonth() + 1
+    const day = d.getDate()
+    const hours = d.getHours().toString().padStart(2, '0')
+    const minutes = d.getMinutes().toString().padStart(2, '0')
+    return `${month}월 ${day}일 ${hours}:${minutes}`
+  }
+
+  return (
+    <div className="admin-view">
+      <main className="admin-content">
+        {/* 관리자 대시보드 */}
+        <section className="admin-section">
+          <h2 className="section-title">관리자 대시보드</h2>
+          <div className="dashboard-cards">
+            <div className="dashboard-card">
+              <div className="dashboard-label">총 주문</div>
+              <div className="dashboard-value">{dashboardStats.total}</div>
+            </div>
+            <div className="dashboard-card">
+              <div className="dashboard-label">주문 접수</div>
+              <div className="dashboard-value">{dashboardStats.received}</div>
+            </div>
+            <div className="dashboard-card">
+              <div className="dashboard-label">제조 중</div>
+              <div className="dashboard-value">{dashboardStats.inProduction}</div>
+            </div>
+            <div className="dashboard-card">
+              <div className="dashboard-label">제조 완료</div>
+              <div className="dashboard-value">{dashboardStats.completed}</div>
+            </div>
+          </div>
+        </section>
+
+        {/* 재고 현황 */}
+        <section className="admin-section">
+          <h2 className="section-title">재고 현황</h2>
+          <div className="stock-cards">
+            {stocks.map(menu => {
+              const status = getStockStatus(menu.stock)
+              return (
+                <div key={menu.id} className="stock-card">
+                  <div className="stock-menu-name">{menu.name}</div>
+                  <div className="stock-info">
+                    <div className="stock-quantity">{menu.stock}개</div>
+                    <div className="stock-status" style={{ color: status.color }}>
+                      {status.text}
+                    </div>
+                  </div>
+                  <div className="stock-controls">
+                    <button 
+                      className="stock-btn decrease"
+                      onClick={() => decreaseStock(menu.id)}
+                      disabled={menu.stock === 0}
+                    >
+                      -
+                    </button>
+                    <button 
+                      className="stock-btn increase"
+                      onClick={() => increaseStock(menu.id)}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </section>
+
+        {/* 주문 현황 */}
+        <section className="admin-section">
+          <h2 className="section-title">주문 현황</h2>
+          <div className="orders-list">
+            {orders.length === 0 ? (
+              <p className="empty-orders">주문이 없습니다.</p>
+            ) : (
+              orders
+                .sort((a, b) => new Date(b.orderTime) - new Date(a.orderTime))
+                .map(order => (
+                  <div key={order.id} className="order-card">
+                    <div className="order-header">
+                      <div className="order-time">{formatDateTime(order.orderTime)}</div>
+                      <div className={`order-status-badge status-${order.status}`}>
+                        {order.status === 'received' && '주문 접수'}
+                        {order.status === 'in_production' && '제조 중'}
+                        {order.status === 'completed' && '제조 완료'}
+                      </div>
+                    </div>
+                    <div className="order-items">
+                      {order.items.map((item, idx) => (
+                        <div key={idx} className="order-item">
+                          <span className="order-item-name">
+                            {item.menuName}
+                            {item.options && item.options.length > 0 && (
+                              ` (${item.options.map(opt => opt.name).join(', ')})`
+                            )}
+                            {' '}X {item.quantity}
+                          </span>
+                          <span className="order-item-price">
+                            {(item.price * item.quantity).toLocaleString()}원
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="order-footer">
+                      <div className="order-total">
+                        총 금액: <strong>{order.totalAmount.toLocaleString()}원</strong>
+                      </div>
+                      <div className="order-actions">
+                        {order.status === 'received' && (
+                          <button 
+                            className="status-btn"
+                            onClick={() => updateOrderStatus(order.id, 'in_production')}
+                          >
+                            제조 시작
+                          </button>
+                        )}
+                        {order.status === 'in_production' && (
+                          <button 
+                            className="status-btn"
+                            onClick={() => updateOrderStatus(order.id, 'completed')}
+                          >
+                            제조 완료
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+            )}
+          </div>
+        </section>
+      </main>
     </div>
   )
 }
