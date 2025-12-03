@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback, memo } from 'react'
 import './App.css'
+import { ToastContainer } from './components/Toast'
 
 // 임의의 커피 메뉴 데이터
 const MENU_DATA = [
@@ -52,6 +53,18 @@ const MENU_DATA = [
 function App() {
   const [currentView, setCurrentView] = useState('order') // 'order' or 'admin'
   const [cart, setCart] = useState([])
+  const [toasts, setToasts] = useState([])
+
+  // Toast 알림 표시 함수
+  const showToast = useCallback((message, type = 'info', duration = 3000) => {
+    const id = Date.now() + Math.random()
+    setToasts(prev => [...prev, { id, message, type, duration }])
+  }, [])
+
+  // Toast 제거 함수
+  const removeToast = useCallback((id) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id))
+  }, [])
   
   // 관리자 화면 상태
   const [stocks, setStocks] = useState([
@@ -81,39 +94,41 @@ function App() {
   ])
 
   // 장바구니 아이템 제거
-  const removeFromCart = (cartKey) => {
+  const removeFromCart = useCallback((cartKey) => {
     setCart(prev => prev.filter(item => item.cartKey !== cartKey))
-  }
+  }, [])
 
   // 장바구니에 아이템 추가
-  const addToCart = (menu, selectedOptions) => {
+  const addToCart = useCallback((menu, selectedOptions) => {
     const optionIds = selectedOptions.map(opt => opt.id).sort().join(',')
     const cartKey = `${menu.id}-${optionIds}`
     
-    const existingItemIndex = cart.findIndex(item => item.cartKey === cartKey)
-    
-    if (existingItemIndex >= 0) {
-      // 이미 장바구니에 있으면 수량 증가
-      const newCart = [...cart]
-      newCart[existingItemIndex].quantity += 1
-      newCart[existingItemIndex].totalPrice = 
-        newCart[existingItemIndex].basePrice * newCart[existingItemIndex].quantity
-      setCart(newCart)
-    } else {
-      // 새 아이템 추가
-      const basePrice = menu.price + selectedOptions.reduce((sum, opt) => sum + opt.price, 0)
-      const newItem = {
-        cartKey,
-        menuId: menu.id,
-        menuName: menu.name,
-        basePrice,
-        selectedOptions: [...selectedOptions],
-        quantity: 1,
-        totalPrice: basePrice
+    setCart(prev => {
+      const existingItemIndex = prev.findIndex(item => item.cartKey === cartKey)
+      
+      if (existingItemIndex >= 0) {
+        // 이미 장바구니에 있으면 수량 증가
+        const newCart = [...prev]
+        newCart[existingItemIndex].quantity += 1
+        newCart[existingItemIndex].totalPrice = 
+          newCart[existingItemIndex].basePrice * newCart[existingItemIndex].quantity
+        return newCart
+      } else {
+        // 새 아이템 추가
+        const basePrice = menu.price + selectedOptions.reduce((sum, opt) => sum + opt.price, 0)
+        const newItem = {
+          cartKey,
+          menuId: menu.id,
+          menuName: menu.name,
+          basePrice,
+          selectedOptions: [...selectedOptions],
+          quantity: 1,
+          totalPrice: basePrice
+        }
+        return [...prev, newItem]
       }
-      setCart([...cart, newItem])
-    }
-  }
+    })
+  }, [])
 
   // 총 금액 계산
   const totalAmount = useMemo(() => {
@@ -121,15 +136,40 @@ function App() {
   }, [cart])
 
   // 주문하기
-  const handleOrder = () => {
+  const handleOrder = useCallback(() => {
     if (cart.length === 0) {
-      alert('장바구니가 비어있습니다.')
+      showToast('장바구니가 비어있습니다.', 'warning')
       return
     }
 
-    alert(`주문이 완료되었습니다!\n총 금액: ${totalAmount.toLocaleString()}원`)
-    setCart([])
-  }
+    // TODO: 실제 API 호출로 변경
+    try {
+      // 주문 데이터 구성
+      const orderData = {
+        items: cart.map(item => ({
+          menuId: item.menuId,
+          menuName: item.menuName,
+          options: item.selectedOptions.map(opt => ({
+            optionId: opt.id,
+            optionName: opt.name
+          })),
+          quantity: item.quantity,
+          price: item.basePrice
+        })),
+        totalAmount: totalAmount
+      }
+
+      // TODO: API 호출
+      // await createOrder(orderData)
+      
+      // 임시: 성공 메시지
+      showToast(`주문이 완료되었습니다!\n총 금액: ${totalAmount.toLocaleString()}원`, 'success')
+      setCart([])
+    } catch (error) {
+      console.error('주문 실패:', error)
+      showToast('주문 처리 중 오류가 발생했습니다. 다시 시도해주세요.', 'error')
+    }
+  }, [cart, totalAmount, showToast])
 
   return (
     <div className="app">
@@ -229,13 +269,17 @@ function App() {
           setOrders={setOrders}
         />
       )}
+
+      {/* Toast 알림 컨테이너 */}
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
     </div>
   )
 }
 
 // 메뉴 카드 컴포넌트
-function MenuCard({ menu, onAddToCart }) {
+const MenuCard = memo(function MenuCard({ menu, onAddToCart }) {
   const [selectedOptions, setSelectedOptions] = useState([])
+  const [imageError, setImageError] = useState(false)
 
   // 옵션 선택/해제
   const toggleOption = (option) => {
@@ -265,8 +309,13 @@ function MenuCard({ menu, onAddToCart }) {
     <div className="menu-card">
       {/* 이미지 영역 */}
       <div className="menu-image">
-        {menu.imageUrl ? (
-          <img src={menu.imageUrl} alt={menu.name} />
+        {menu.imageUrl && !imageError ? (
+          <img 
+            src={menu.imageUrl} 
+            alt={menu.name}
+            onError={() => setImageError(true)}
+            loading="lazy"
+          />
         ) : (
           <div className="image-placeholder">
             <span>이미지</span>
@@ -307,10 +356,10 @@ function MenuCard({ menu, onAddToCart }) {
       </div>
     </div>
   )
-}
+})
 
 // 관리자 화면 컴포넌트
-function AdminView({ stocks, setStocks, orders, setOrders }) {
+function AdminView({ stocks, setStocks, orders, setOrders, showToast }) {
   // 대시보드 통계 계산
   const dashboardStats = useMemo(() => {
     const totalOrders = orders.length
@@ -327,45 +376,47 @@ function AdminView({ stocks, setStocks, orders, setOrders }) {
   }, [orders])
 
   // 재고 상태 확인
-  const getStockStatus = (stock) => {
+  const getStockStatus = useCallback((stock) => {
     if (stock === 0) return { text: '품절', color: '#e74c3c' }
     if (stock < 5) return { text: '주의', color: '#f39c12' }
     return { text: '정상', color: '#27ae60' }
-  }
+  }, [])
 
   // 재고 증가
-  const increaseStock = (menuId) => {
+  const increaseStock = useCallback((menuId) => {
     setStocks(prev => prev.map(s => 
       s.id === menuId ? { ...s, stock: s.stock + 1 } : s
     ))
-  }
+  }, [])
 
   // 재고 감소
-  const decreaseStock = (menuId) => {
+  const decreaseStock = useCallback((menuId) => {
     setStocks(prev => prev.map(s => {
       if (s.id === menuId && s.stock > 0) {
         return { ...s, stock: s.stock - 1 }
       }
       return s
     }))
-  }
+  }, [])
 
   // 주문 상태 변경
-  const updateOrderStatus = (orderId, newStatus) => {
+  const updateOrderStatus = useCallback((orderId, newStatus) => {
     setOrders(prev => prev.map(o => 
       o.id === orderId ? { ...o, status: newStatus } : o
     ))
-  }
+  }, [])
 
-  // 날짜 포맷팅
-  const formatDateTime = (date) => {
-    const d = new Date(date)
-    const month = d.getMonth() + 1
-    const day = d.getDate()
-    const hours = d.getHours().toString().padStart(2, '0')
-    const minutes = d.getMinutes().toString().padStart(2, '0')
-    return `${month}월 ${day}일 ${hours}:${minutes}`
-  }
+  // 날짜 포맷팅 (메모이제이션)
+  const formatDateTime = useMemo(() => {
+    return (date) => {
+      const d = new Date(date)
+      const month = d.getMonth() + 1
+      const day = d.getDate()
+      const hours = d.getHours().toString().padStart(2, '0')
+      const minutes = d.getMinutes().toString().padStart(2, '0')
+      return `${month}월 ${day}일 ${hours}:${minutes}`
+    }
+  }, [])
 
   return (
     <div className="admin-view">

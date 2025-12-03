@@ -1,5 +1,13 @@
 {
-  "openLinksInExternalBrowser": true
+  "openLinksInExternalBrowser": true,
+  "openExternal": true,
+  "browser": {
+    "default": "chrome",
+    "openInExternal": true
+  },
+  "cursor": {
+    "openExternal": true
+  }
 }
 
 

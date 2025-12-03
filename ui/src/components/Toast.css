@@ -1,0 +1,103 @@
+.toast-container {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  pointer-events: none;
+}
+
+.toast {
+  min-width: 300px;
+  max-width: 400px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: slideInFromRight 0.3s ease-out;
+  pointer-events: auto;
+  border-left: 4px solid;
+}
+
+.toast-info {
+  border-left-color: #4a90e2;
+}
+
+.toast-success {
+  border-left-color: #27ae60;
+}
+
+.toast-error {
+  border-left-color: #e74c3c;
+}
+
+.toast-warning {
+  border-left-color: #f39c12;
+}
+
+.toast-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  gap: 1rem;
+}
+
+.toast-message {
+  flex: 1;
+  color: #333;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+  flex-shrink: 0;
+}
+
+.toast-close:hover {
+  color: #333;
+}
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .toast-container {
+    top: 70px;
+    right: 10px;
+    left: 10px;
+  }
+
+  .toast {
+    min-width: auto;
+    max-width: 100%;
+  }
+}
+
+
+
+
+
